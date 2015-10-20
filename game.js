@@ -32,13 +32,19 @@ function Combiner(color, x, y) {
 	};
 }
 
-var combiner = new Combiner("green", 0, 0);
+// var combiner = new Combiner("green", 0, 0);
+var active = {
+	one: new Combiner("green", 3, 0),
+	two: new Combiner("yellow", 4, 0)
+};
 var combiners = [];
 // combiners.add(combiner);
 
 var draw = function() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	combiner.draw();
+	active.one.draw();
+	active.two.draw();
+	// combiner.draw();
 	// console.log("drawn");
 	for (var i = 0; i < combiners.length; i++) {
 		combiners[i].draw();
@@ -67,29 +73,39 @@ window.addEventListener("keypress", function(e) {
 	// console.log(combiner);
 	switch (e.key) {
 		case "ArrowDown":
-			var height = getRowHeight(combiner.x);
-			if (height < 7) {
-				combiner.y = 8 - height; // (canvas.height - size) - (combiners.length * size);
-				// combiner.y = 32;
-				combiners.push(combiner);
+			var heightOne = getRowHeight(active.one.x);
+			var heightTwo = getRowHeight(active.two.x);
+
+			var color = colors[getRandom(0, colors.length)];
+			if (heightOne < 7 && heightTwo < 7) {
+				active.one.y = 8 - heightOne;
+				combiners.push(active.one);
 				var color = colors[getRandom(0, colors.length)];
-				combiner = new Combiner(color, combiner.x, 0);
+				active.one = new Combiner(color, 3, 0);
+
+				active.two.y = 8 - heightTwo;
+				combiners.push(active.two);
+				color = colors[getRandom(0, colors.length)];
+				active.two = new Combiner(color, 4, 0);
 			} else {
 				// TODO: Game over
 			}
+
 			e.preventDefault();
 			break;
 
 		case "ArrowLeft":
-			if (combiner.x > 0) {
-				combiner.x -= 1;
+			if (active.one.x > 0 && active.two.x > 0) {
+				active.one.x -= 1;
+				active.two.x -= 1;
 			}
 			e.preventDefault();
 			break;
 
 		case "ArrowRight":
-			if (combiner.x + 1 < settings.width) {
-				combiner.x += 1;
+			if (active.one.x + 1 < settings.width && active.two.x + 1 < settings.width) {
+				active.one.x += 1;
+				active.two.x += 1;
 			}
 			e.preventDefault();
 			break;
