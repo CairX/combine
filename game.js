@@ -31,6 +31,8 @@ function Combiner(color, x, y) {
 		var x = this.x * this.size;
 		var y = (settings.height * this.size) - (this.y * this.size + this.size);
 		context.fillRect(x, y, this.size, this.size);
+		context.strokeStyle = "black";
+		context.strokeRect(x + 0.5, y + 0.5, this.size, this.size);
 	};
 }
 
@@ -41,6 +43,7 @@ var active = {
 	state: 0
 };
 var rotate = function(a) {
+	// Handle 0x0 rotation.
 	switch (a.state) {
 		case 0:
 			a.one.x += 1;
@@ -81,6 +84,62 @@ var draw = function() {
 	window.requestAnimationFrame(draw);
 };
 
+// Do combine again if anything has changed.
+var combine = function () {
+	// Combine
+	for (var i = 0; i < combiners.length; i++) {
+		var c = combiners[i];
+		var matches = getAround(c);
+		console.log(matches);
+		// var up = getCombiner(c.x, c.y - 1, c.color);
+		// var down = getCombiner(c.x, c.y + 1, c.color);
+		// var left = getCombiner(c.x - 1, c.y, c.color);
+		// var right = getCombiner(c.x + 1, c.y, c.color);
+	}
+
+	// Gravity fall
+};
+
+var getAround = function(c) {
+	var matches = [];
+
+	var up = getCombiner(c.x, c.y - 1, c.color);
+	if (up) {
+		matches.push(up);
+	}
+	var down = getCombiner(c.x, c.y + 1, c.color);
+	if (down) {
+		matches.push(down);
+	}
+	var left = getCombiner(c.x - 1, c.y, c.color);
+	if (left) {
+		matches.push(left);
+	}
+	var right = getCombiner(c.x + 1, c.y, c.color);
+	if (right) {
+		matches.push(right);
+	}
+
+	// var tmp = [];
+	// for (var i = 0; i < matches.length; i++) {
+	// 	matches = tmp.concat(getAround(matches[i]));
+	// }
+
+	// return matches.concat(tmp);
+	return matches;
+};
+
+var getCombiner = function(x, y, color) {
+	for (var i = 0; i < combiners.length; i++) {
+		var c = combiners[i];
+		if (c.color == color && c.x == x && c.y == y) {
+			return c;
+		}
+	}
+
+	return null;
+};
+
 var getRowHeight = function(x) {
 	var height = 0;
 
@@ -101,13 +160,14 @@ window.addEventListener("keypress", function(e) {
 	switch (e.key) {
 		case "ArrowDown":
 			var height = getRowHeight(active.one.x);
-
-			active.one.y = height;
+			active.one.y = height + (active.one.y - 7);
 			combiners.push(active.one);
 
 
-			height = getRowHeight(active.two.x);
-			active.two.y = height;
+			if (active.one.x != active.two.x) {
+				height = getRowHeight(active.two.x);
+			}
+			active.two.y = height + (active.two.y - 7);
 			combiners.push(active.two);
 
 			if (getRowHeight(active.one.x) <= 7 && getRowHeight(active.two.x) <= 7) {
@@ -120,6 +180,8 @@ window.addEventListener("keypress", function(e) {
 			active.one = new Combiner(colors[getRandom(0, colors.length)], 3, 7);
 			active.two = new Combiner(colors[getRandom(0, colors.length)], 4, 7);
 			active.state = 0;
+
+			combine();
 
 			e.preventDefault();
 			break;
