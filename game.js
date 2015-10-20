@@ -28,14 +28,45 @@ function Combiner(color, x, y) {
 
 	this.draw = function() {
 		context.fillStyle = this.color;
-		context.fillRect((this.x * this.size), (this.y * this.size), this.size, this.size);
+		var x = this.x * this.size;
+		var y = (settings.height * this.size) - (this.y * this.size + this.size);
+		context.fillRect(x, y, this.size, this.size);
 	};
 }
 
 // var combiner = new Combiner("green", 0, 0);
 var active = {
-	one: new Combiner("green", 3, 0),
-	two: new Combiner("yellow", 4, 0)
+	one: new Combiner("green", 3, 7),
+	two: new Combiner("yellow", 4, 7),
+	state: 0
+};
+var rotate = function(a) {
+	switch (a.state) {
+		case 0:
+			a.one.x = 4;
+			a.one.y = 8;
+			a.state = 1;
+			break;
+
+		case 1:
+			a.one.y = 7;
+			a.two.x = 3;
+			a.state = 2;
+			break;
+
+		case 2:
+			// a.one.x = 3;
+			a.two.x = 4;
+			a.two.y = 8;
+			a.state = 3;
+			break;
+
+		default:
+			a.one.x = 3;
+			a.two.y = 7;
+			a.state = 0;
+			break;
+	}
 };
 var combiners = [];
 // combiners.add(combiner);
@@ -73,24 +104,32 @@ window.addEventListener("keypress", function(e) {
 	// console.log(combiner);
 	switch (e.key) {
 		case "ArrowDown":
-			var heightOne = getRowHeight(active.one.x);
-			var heightTwo = getRowHeight(active.two.x);
+			var height = getRowHeight(active.one.x);
 
-			var color = colors[getRandom(0, colors.length)];
-			if (heightOne < 7 && heightTwo < 7) {
-				active.one.y = 8 - heightOne;
-				combiners.push(active.one);
-				var color = colors[getRandom(0, colors.length)];
-				active.one = new Combiner(color, 3, 0);
+			active.one.y = height;
+			combiners.push(active.one);
 
-				active.two.y = 8 - heightTwo;
-				combiners.push(active.two);
-				color = colors[getRandom(0, colors.length)];
-				active.two = new Combiner(color, 4, 0);
+
+			height = getRowHeight(active.two.x);
+			active.two.y = height;
+			combiners.push(active.two);
+
+			if (getRowHeight(active.one.x) <= 7 && getRowHeight(active.two.x) <= 7) {
+				
 			} else {
 				// TODO: Game over
+				combiners = [];
 			}
 
+			active.one = new Combiner(colors[getRandom(0, colors.length)], 3, 7);
+			active.two = new Combiner(colors[getRandom(0, colors.length)], 4, 7);
+			active.state = 0;
+
+			e.preventDefault();
+			break;
+
+		case "ArrowUp":
+			rotate(active);
 			e.preventDefault();
 			break;
 
