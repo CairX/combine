@@ -43,40 +43,37 @@ var active = {
 var rotate = function(a) {
 	switch (a.state) {
 		case 0:
-			a.one.x = 4;
-			a.one.y = 8;
+			a.one.x += 1;
+			a.one.y += 1;
 			a.state = 1;
 			break;
 
 		case 1:
-			a.one.y = 7;
-			a.two.x = 3;
+			a.one.y -= 1;
+			a.two.x -= 1;
 			a.state = 2;
 			break;
 
 		case 2:
-			// a.one.x = 3;
-			a.two.x = 4;
-			a.two.y = 8;
+			a.two.x += 1;
+			a.two.y += 1;
 			a.state = 3;
 			break;
 
 		default:
-			a.one.x = 3;
-			a.two.y = 7;
+			a.one.x -= 1;
+			a.two.y -= 1;
 			a.state = 0;
 			break;
 	}
 };
 var combiners = [];
-// combiners.add(combiner);
 
 var draw = function() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	active.one.draw();
 	active.two.draw();
-	// combiner.draw();
-	// console.log("drawn");
+
 	for (var i = 0; i < combiners.length; i++) {
 		combiners[i].draw();
 	}
@@ -101,7 +98,6 @@ draw();
 window.addEventListener("keypress", function(e) {
 	console.log(e);
 
-	// console.log(combiner);
 	switch (e.key) {
 		case "ArrowDown":
 			var height = getRowHeight(active.one.x);
@@ -149,8 +145,4 @@ window.addEventListener("keypress", function(e) {
 			e.preventDefault();
 			break;
 	}
-	// console.log(combiner);
-
-	
-	// return false;
 });
