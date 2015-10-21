@@ -81,23 +81,110 @@ var draw = function() {
 		combiners[i].draw();
 	}
 
+	context.strokeStyle = "blue";
+	context.beginPath();
+	context.moveTo(0, settings.size * 2);
+	context.lineTo(settings.size * settings.width + 0.5, settings.size * 2 + 0.5);
+	context.closePath();
+	context.stroke();
+
 	window.requestAnimationFrame(draw);
 };
 
 // Do combine again if anything has changed.
 var combine = function () {
+	var god = [];
+	var todo = [];
+
 	// Combine
 	for (var i = 0; i < combiners.length; i++) {
 		var c = combiners[i];
-		var matches = getAround(c);
-		console.log(matches);
+		// var matches = getAround(c);
+		var matches = getPath(c);
+
+		var godContains = (god.indexOf(matches[0]) >= 0);
+
+		// for (var m = 0; m < matches.length; m++) {
+		// }
+
+
+		// console.log(matches);
+		if (!godContains && matches.length >= 3 && matches.indexOf(matches) == -1) {
+			console.log(matches);
+			todo.push(matches);
+			god = god.concat(matches);
+		}
+		// console.log("--- ---");
 		// var up = getCombiner(c.x, c.y - 1, c.color);
 		// var down = getCombiner(c.x, c.y + 1, c.color);
 		// var left = getCombiner(c.x - 1, c.y, c.color);
 		// var right = getCombiner(c.x + 1, c.y, c.color);
 	}
+	// console.log("--- --- ---");
+	console.log(todo);
+	console.log(god);
+	console.log("--- --- --- ---");
 
-	// Gravity fall
+	for (var t = 0; t < todo.length; t++) {
+		var td = todo[0];
+
+		// Find the combiner that is the smallest.
+		// As in first be the lowest value on y.
+		// And then lowest with x.
+		var base = td[0];
+		for (var ci = 1; ci < td.length; ci++) {
+			var cd = td[ci];
+			if (cd.x <= base.x && cd.y <= base.y) {
+				base = cd;
+			}
+		}
+
+		for (var cii = 0; cii < td.length; cii++) {
+			var cdd = td[cii];
+			var indx = combiners.indexOf(cdd);
+			if (indx >= 0) {
+				combiners.splice(indx, 1);
+			}
+		}
+
+		console.log(base);
+		var newLevel = colors.indexOf(base.color) + 1;
+		// If he combination was on the last level we don't
+		// make a replacement instead simply remove it.
+		// This keeps the game going.
+		if (newLevel < colors.length) {
+			var newColor = colors[newLevel];
+			var newCombiner = new Combiner(newColor, base.x, base.y);
+			console.log(newCombiner);
+			combiners.push(newCombiner);
+		}
+	}
+
+	// TODO: Gravity fall
+};
+
+var getPath = function(c) {
+
+	var path = [c];
+	var handled = [];
+	var nothandled = [c];
+
+	while (nothandled.length > 0) {
+		var n = nothandled.shift();
+		handled.push(n);
+
+		var around = getAround(n);
+		for (var i = 0; i < around.length; i++) {
+			var a = around[i];
+			// console.log(a);
+			// console.log("handled: " + handled.indexOf(a));
+			if (handled.indexOf(a) == -1) {
+				nothandled.push(a);
+			}
+		}
+	}
+
+	return handled;
 };
 
 var getAround = function(c) {
@@ -148,14 +235,14 @@ var getRowHeight = function(x) {
 			height += 1;
 		}
 	}
-	console.log(height);
+	// console.log(height);
 	return height;
 };
 //window.requestAnimationFrame(draw);
 draw();
 
 window.addEventListener("keypress", function(e) {
-	console.log(e);
+	// console.log(e);
 
 	switch (e.key) {
 		case "ArrowDown":
