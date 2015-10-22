@@ -43,7 +43,7 @@ var active = {
 	state: 0
 };
 var rotate = function(a) {
-	// Handle 0x0 rotation.
+	// TODO: Handle 0x0 rotation.
 	switch (a.state) {
 		case 0:
 			a.one.x += 1;
@@ -83,8 +83,8 @@ var draw = function() {
 
 	context.strokeStyle = "blue";
 	context.beginPath();
-	context.moveTo(0, settings.size * 2);
-	context.lineTo(settings.size * settings.width + 0.5, settings.size * 2 + 0.5);
+	context.moveTo(0, settings.size * 2  + 0.5);
+	context.lineTo(settings.size * settings.width, settings.size * 2 + 0.5);
 	context.closePath();
 	context.stroke();
 
@@ -130,12 +130,18 @@ var combine = function () {
 
 		// Find the combiner that is the smallest.
 		// As in first be the lowest value on y.
-		// And then lowest with x.
 		var base = td[0];
 		for (var ci = 1; ci < td.length; ci++) {
 			var cd = td[ci];
-			if (cd.x <= base.x && cd.y <= base.y) {
+			if (cd.y <= base.y) {
 				base = cd;
+			}
+		}
+		// And then lowest with x.
+		for (var cx = 1; cx < td.length; cx++) {
+			var cdx = td[cx];
+			if (cdx.y == base.y && cdx.x < base.x) {
+				base = cdx;
 			}
 		}
 
@@ -161,6 +167,30 @@ var combine = function () {
 	}
 
 	// TODO: Gravity fall
+	for (var ciii = 0; ciii < settings.width; ciii++) {
+		var column = getColumn(ciii);
+		// console.log(column);
+		column.sort(function(a, b) {
+			return a.y - b.y;
+		});
+		// console.log(column);
+
+		for (var y = 0; y < column.length; y++) {
+			column[y].y = y;
+		}
+	}
+
+	return (todo.length > 0);
+};
+
+var getColumn = function(x) {
+	var column = [];
+	for (var i = 0; i < combiners.length; i++) {
+		if (combiners[i].x == x) {
+			column.push(combiners[i]);
+		}
+	}
+	return column;
 };
 
 var getPath = function(c) {
@@ -268,7 +298,10 @@ window.addEventListener("keypress", function(e) {
 			active.two = new Combiner(colors[getRandom(0, colors.length)], 4, 7);
 			active.state = 0;
 
-			combine();
+			var changed = true;
+			while (changed) {
+				changed = combine();
+			}
 
 			e.preventDefault();
 			break;
