@@ -9,19 +9,49 @@ var settings = {
 };
 
 
+var Levels = (function() {
+	var colors = [
+		"green",
+		"yellow",
+		"orange",
+		"red",
+		"pink",
+		"purple",
+		"blue",
+		"lightblue",
+		"black",
+		"white"
+	];
+	var min = 0;
+	var max = (colors.length - 1);
+	var unlocked = 1;
 
-var colors = ["green", "yellow", "orange", "red", "purple", "blue"];
+	var self = {};
+	self.getColor = function(level) {
+		return colors[level];
+	};
 
-var getRandom = function(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-};
+	self.getNext = function(level) {
+		var next = (level + 1);
+		if (next <= max) {
+			unlocked = Math.max(unlocked, next);
+			return next;
+		} else {
+			return null;
+		}
+	};
+
+	self.getRandom = function() {
+		return Math.floor(Math.random() * ((unlocked + 1) - min)) + min;
+	};
+
+	return self;
+})();
 
 var canvas = document.getElementById("canvas");
 canvas.width = settings.size * settings.width;
 canvas.height = settings.size * settings.height;
-
 var context = canvas.getContext("2d");
-
 
 function Combiner(level, x, y) {
 	this.x = x;
@@ -30,7 +60,7 @@ function Combiner(level, x, y) {
 	this.size = settings.size;
 
 	this.draw = function(context) {
-		context.fillStyle = colors[this.level];
+		context.fillStyle = Levels.getColor(this.level);
 		var x = this.x * this.size;
 		var y = (settings.height * this.size) - (this.y * this.size + this.size);
 		context.fillRect(x, y, this.size, this.size);
@@ -39,10 +69,9 @@ function Combiner(level, x, y) {
 	};
 }
 
-// var combiner = new Combiner("green", 0, 0);
 var active = {
-	one: new Combiner(0, 3, 7),
-	two: new Combiner(1, 4, 7),
+	one: new Combiner(Levels.getRandom(), 3, 7),
+	two: new Combiner(Levels.getRandom(), 4, 7),
 	state: 0
 };
 var rotate = function(a) {
@@ -105,27 +134,15 @@ var combine = function () {
 	// Combine
 	for (var i = 0; i < combiners.length; i++) {
 		var c = combiners[i];
-		// var matches = getAround(c);
 		var matches = getPath(c);
-
 		var godContains = (god.indexOf(matches[0]) >= 0);
 
-		// for (var m = 0; m < matches.length; m++) {
-		// }
-
-
-		// console.log(matches);
 		if (!godContains && matches.length >= 3 && matches.indexOf(matches) == -1) {
 			console.log(matches);
 			todo.push(matches);
 			god = god.concat(matches);
 		}
-		// console.log("--- ---");
 	}
-	// console.log("--- --- ---");
-	console.log(todo);
-	console.log(god);
-	console.log("--- --- --- ---");
 
 	for (var t = 0; t < todo.length; t++) {
 		var td = todo[0];
@@ -147,6 +164,7 @@ var combine = function () {
 			}
 		}
 
+		// Remove the old combiners.
 		for (var cii = 0; cii < td.length; cii++) {
 			var cdd = td[cii];
 			var indx = combiners.indexOf(cdd);
@@ -155,26 +173,22 @@ var combine = function () {
 			}
 		}
 
-		console.log(base);
-		var newLevel = base.level + 1;
 		// If he combination was on the last level we don't
 		// make a replacement instead simply remove it.
 		// This keeps the game going.
-		if (newLevel < colors.length) {
+		var newLevel = Levels.getNext(base.level);
+		if (newLevel) {
 			var newCombiner = new Combiner(newLevel, base.x, base.y);
-			console.log(newCombiner);
 			combiners.push(newCombiner);
 		}
 	}
 
-	// TODO: Gravity fall
+	// Gravity fall
 	for (var ciii = 0; ciii < settings.width; ciii++) {
 		var column = getColumn(ciii);
-		// console.log(column);
 		column.sort(function(a, b) {
 			return a.y - b.y;
 		});
-		// console.log(column);
 
 		for (var y = 0; y < column.length; y++) {
 			column[y].y = y;
@@ -234,12 +248,6 @@ var getAround = function(c) {
 		matches.push(right);
 	}
 
-	// var tmp = [];
-	// for (var i = 0; i < matches.length; i++) {
-	// 	matches = tmp.concat(getAround(matches[i]));
-	// }
-
-	// return matches.concat(tmp);
 	return matches;
 };
 
@@ -262,10 +270,9 @@ var getRowHeight = function(x) {
 			height += 1;
 		}
 	}
-	// console.log(height);
+
 	return height;
 };
-//window.requestAnimationFrame(draw);
 draw();
 
 window.addEventListener("keypress", function(e) {
@@ -291,8 +298,8 @@ window.addEventListener("keypress", function(e) {
 				combiners = [];
 			}
 
-			active.one = new Combiner(getRandom(0, colors.length), 3, 7);
-			active.two = new Combiner(getRandom(0, colors.length), 4, 7);
+			active.one = new Combiner(Levels.getRandom(), 3, 7);
+			active.two = new Combiner(Levels.getRandom(), 4, 7);
 			active.state = 0;
 
 			var changed = true;
