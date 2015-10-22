@@ -8,6 +8,8 @@ var settings = {
 	height: 9
 };
 
+
+
 var colors = ["green", "yellow", "orange", "red", "purple", "blue"];
 
 var getRandom = function(min, max) {
@@ -20,14 +22,15 @@ canvas.height = settings.size * settings.height;
 
 var context = canvas.getContext("2d");
 
-function Combiner(color, x, y) {
+
+function Combiner(level, x, y) {
 	this.x = x;
 	this.y = y;
-	this.color = color;
+	this.level = level;
 	this.size = settings.size;
 
-	this.draw = function() {
-		context.fillStyle = this.color;
+	this.draw = function(context) {
+		context.fillStyle = colors[this.level];
 		var x = this.x * this.size;
 		var y = (settings.height * this.size) - (this.y * this.size + this.size);
 		context.fillRect(x, y, this.size, this.size);
@@ -38,8 +41,8 @@ function Combiner(color, x, y) {
 
 // var combiner = new Combiner("green", 0, 0);
 var active = {
-	one: new Combiner("green", 3, 7),
-	two: new Combiner("yellow", 4, 7),
+	one: new Combiner(0, 3, 7),
+	two: new Combiner(1, 4, 7),
 	state: 0
 };
 var rotate = function(a) {
@@ -74,11 +77,11 @@ var combiners = [];
 
 var draw = function() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	active.one.draw();
-	active.two.draw();
+	active.one.draw(context);
+	active.two.draw(context);
 
 	for (var i = 0; i < combiners.length; i++) {
-		combiners[i].draw();
+		combiners[i].draw(context);
 	}
 
 	context.strokeStyle = "blue";
@@ -92,6 +95,9 @@ var draw = function() {
 };
 
 // Do combine again if anything has changed.
+// TODO: Somewhere there is broken combinations
+// happening, just a bit tricky to follow with
+// the instant changes taking place.
 var combine = function () {
 	var god = [];
 	var todo = [];
@@ -115,10 +121,6 @@ var combine = function () {
 			god = god.concat(matches);
 		}
 		// console.log("--- ---");
-		// var up = getCombiner(c.x, c.y - 1, c.color);
-		// var down = getCombiner(c.x, c.y + 1, c.color);
-		// var left = getCombiner(c.x - 1, c.y, c.color);
-		// var right = getCombiner(c.x + 1, c.y, c.color);
 	}
 	// console.log("--- --- ---");
 	console.log(todo);
@@ -154,13 +156,12 @@ var combine = function () {
 		}
 
 		console.log(base);
-		var newLevel = colors.indexOf(base.color) + 1;
+		var newLevel = base.level + 1;
 		// If he combination was on the last level we don't
 		// make a replacement instead simply remove it.
 		// This keeps the game going.
 		if (newLevel < colors.length) {
-			var newColor = colors[newLevel];
-			var newCombiner = new Combiner(newColor, base.x, base.y);
+			var newCombiner = new Combiner(newLevel, base.x, base.y);
 			console.log(newCombiner);
 			combiners.push(newCombiner);
 		}
@@ -194,8 +195,6 @@ var getColumn = function(x) {
 };
 
 var getPath = function(c) {
-
-	var path = [c];
 	var handled = [];
 	var nothandled = [c];
 
@@ -206,8 +205,6 @@ var getPath = function(c) {
 		var around = getAround(n);
 		for (var i = 0; i < around.length; i++) {
 			var a = around[i];
-			// console.log(a);
-			// console.log("handled: " + handled.indexOf(a));
 			if (handled.indexOf(a) == -1) {
 				nothandled.push(a);
 			}
@@ -220,19 +217,19 @@ var getPath = function(c) {
 var getAround = function(c) {
 	var matches = [];
 
-	var up = getCombiner(c.x, c.y - 1, c.color);
+	var up = getCombiner(c.x, c.y - 1, c.level);
 	if (up) {
 		matches.push(up);
 	}
-	var down = getCombiner(c.x, c.y + 1, c.color);
+	var down = getCombiner(c.x, c.y + 1, c.level);
 	if (down) {
 		matches.push(down);
 	}
-	var left = getCombiner(c.x - 1, c.y, c.color);
+	var left = getCombiner(c.x - 1, c.y, c.level);
 	if (left) {
 		matches.push(left);
 	}
-	var right = getCombiner(c.x + 1, c.y, c.color);
+	var right = getCombiner(c.x + 1, c.y, c.level);
 	if (right) {
 		matches.push(right);
 	}
@@ -246,10 +243,10 @@ var getAround = function(c) {
 	return matches;
 };
 
-var getCombiner = function(x, y, color) {
+var getCombiner = function(x, y, level) {
 	for (var i = 0; i < combiners.length; i++) {
 		var c = combiners[i];
-		if (c.color == color && c.x == x && c.y == y) {
+		if (c.level == level && c.x == x && c.y == y) {
 			return c;
 		}
 	}
@@ -294,8 +291,8 @@ window.addEventListener("keypress", function(e) {
 				combiners = [];
 			}
 
-			active.one = new Combiner(colors[getRandom(0, colors.length)], 3, 7);
-			active.two = new Combiner(colors[getRandom(0, colors.length)], 4, 7);
+			active.one = new Combiner(getRandom(0, colors.length), 3, 7);
+			active.two = new Combiner(getRandom(0, colors.length), 4, 7);
 			active.state = 0;
 
 			var changed = true;
