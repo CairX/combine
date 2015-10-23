@@ -25,7 +25,7 @@ var Game = (function() {
 			items[i].draw(context);
 		}
 
-		context.strokeStyle = "blue";
+		context.strokeStyle = "#555";
 		context.beginPath();
 		context.moveTo(0, settings.size * 2  + 0.5);
 		context.lineTo(settings.size * settings.width, settings.size * 2 + 0.5);
