@@ -79,7 +79,10 @@ var Levels = (function() {
 	self.getNext = function(level) {
 		var next = (level + 1);
 		if (next <= max) {
-			unlocked = Math.max(unlocked, next);
+			if (next < max) {
+				// Can't random ut a max box.
+				unlocked = Math.max(unlocked, next);
+			}
 			return next;
 		} else {
 			return null;
@@ -112,6 +115,12 @@ function Combiner(level, x, y) {
 		context.strokeRect(x + 0.5, y + 0.5, this.size, this.size);
 	};
 }
+
+var CombinerSort = function(a, b) {
+	if (a.x > b.x || a.y > b.y) { return 1; }
+	if (a.x < b.x || a.y < b.y) { return -1; }
+	return 0;
+};
 
 
 /* --------------------------------- */
@@ -190,92 +199,43 @@ Game.add(Active);
 
 
 var Board = (function() {
-	var combiners = [];
+	var columns = [[], [], [], [], [], [], []];
 	var self = {};
 
-	// Do combine again if anything has changed.
-	// TODO: Somewhere there is broken combinations
-	// happening, just a bit tricky to follow with
-	// the instant changes taking place.
 	self.combine = function () {
-		var god = [];
-		var todo = [];
+		var paths = getPaths();
 
-		// Combine
-		for (var i = 0; i < combiners.length; i++) {
-			var c = combiners[i];
-			var matches = getPath(c);
-			var godContains = (god.indexOf(matches[0]) >= 0);
-
-			if (!godContains && matches.length >= 3 && matches.indexOf(matches) == -1) {
-				console.log(matches);
-				todo.push(matches);
-				god = god.concat(matches);
-			}
-		}
-
-		for (var t = 0; t < todo.length; t++) {
-			var td = todo[0];
-
-			// Find the combiner that is the smallest.
-			// As in first be the lowest value on y.
-			var base = td[0];
-			for (var ci = 1; ci < td.length; ci++) {
-				var cd = td[ci];
-				if (cd.y <= base.y) {
-					base = cd;
-				}
-			}
-			// And then lowest with x.
-			for (var cx = 1; cx < td.length; cx++) {
-				var cdx = td[cx];
-				if (cdx.y == base.y && cdx.x < base.x) {
-					base = cdx;
-				}
-			}
-
-			// Remove the old combiners.
-			for (var cii = 0; cii < td.length; cii++) {
-				var cdd = td[cii];
-				var indx = combiners.indexOf(cdd);
-				if (indx >= 0) {
-					combiners.splice(indx, 1);
-				}
-			}
-
-			// If he combination was on the last level we don't
-			// make a replacement instead simply remove it.
-			// This keeps the game going.
-			var newLevel = Levels.getNext(base.level);
-			if (newLevel) {
-				var newCombiner = new Combiner(newLevel, base.x, base.y);
-				combiners.push(newCombiner);
-			}
-		}
+		// Combine the paths into one.
+		combinePaths(paths);
 
 		// Gravity fall
-		for (var ciii = 0; ciii < settings.width; ciii++) {
-			var column = getColumn(ciii);
-			column.sort(function(a, b) {
-				return a.y - b.y;
-			});
+		gravity();
 
-			for (var y = 0; y < column.length; y++) {
-				column[y].y = y;
-			}
-		}
-
-		return (todo.length > 0);
+		return (paths.length > 0);
 	};
 
-	var getColumn = function(x) {
-		var column = [];
-		for (var i = 0; i < combiners.length; i++) {
-			if (combiners[i].x == x) {
-				column.push(combiners[i]);
+	var getPaths = function() {
+		var paths = [];
+		var pathsGod = [];
+
+		// Finding the paths to combine.
+		for (var column = 0; column < columns.length; column++) {
+			for (var row = 0; row < columns[column].length; row++) {
+				var combiner = columns[column][row];
+
+				if (pathsGod.indexOf(combiner) == -1) {
+					var path = getPath(combiner);
+
+					if (path.length >= 3) {
+						paths.push(path);
+					}
+
+					pathsGod = pathsGod.concat(path);
+				}
 			}
 		}
-		return column;
+
+		return paths;
 	};
 
 	var getPath = function(c) {
@@ -301,19 +261,19 @@ var Board = (function() {
 	var getAround = function(c) {
 		var matches = [];
 
-		var up = getCombiner(c.x, c.y - 1, c.level);
+		var up = getCombiner(c.level, c.x, c.y - 1);
 		if (up) {
 			matches.push(up);
 		}
-		var down = getCombiner(c.x, c.y + 1, c.level);
+		var down = getCombiner(c.level, c.x, c.y + 1);
 		if (down) {
 			matches.push(down);
 		}
-		var left = getCombiner(c.x - 1, c.y, c.level);
+		var left = getCombiner(c.level, c.x - 1, c.y);
 		if (left) {
 			matches.push(left);
 		}
-		var right = getCombiner(c.x + 1, c.y, c.level);
+		var right = getCombiner(c.level, c.x + 1, c.y);
 		if (right) {
 			matches.push(right);
 		}
@@ -321,63 +281,105 @@ var Board = (function() {
 		return matches;
 	};
 
-	var getCombiner = function(x, y, level) {
-		for (var i = 0; i < combiners.length; i++) {
-			var c = combiners[i];
-			if (c.level == level && c.x == x && c.y == y) {
-				return c;
-			}
-		}
+	var getCombiner = function(level, x, y) {
+		// TODO: Store that 7 somewhere.
+		if (x < 0 || x >= 7) { return null; }
+		if (y < 0 || y >= 7) { return null; }
 
-		return null;
+		var rows = columns[x];
+		if (y >= rows.length) { return null; }
+
+		var combiner = rows[y];
+		if (combiner.level != level) { return null; }
+
+		return combiner;
 	};
 
-	var getRowHeight = function(x) {
-		var height = 0;
-
-		for (var i = 0; i < combiners.length; i++) {
-			if (combiners[i].x == x) {
-				height += 1;
-			}
-		}
-
-		return height;
+	var getColumnHeight = function(column) {
+		return columns[column].length;
 	};
 
-	self.add = function(cs) {
-		var one = cs[0];
-		var two = cs[1];
+	var combinePaths = function(paths) {
+		// Combine the paths into one.
+		for (var p = 0; p < paths.length; p++) {
+			var path = paths[p];
+			path.sort(CombinerSort);
 
-		var height = getRowHeight(one.x);
-		one.y = height + (one.y - 7);
-		combiners.push(one);
+			var base = path.shift();
+			// Replace old with new.
+			var newLevel = Levels.getNext(base.level);
+			if (newLevel) {
+				var newCombiner = new Combiner(newLevel, base.x, base.y);
+				columns[newCombiner.x][newCombiner.y] = newCombiner;
+			} else {
+				columns[base.x].splice(columns[base.x].indexOf(base), 1);
+			}
 
-
-		if (one.x != two.x) {
-			height = getRowHeight(two.x);
+			// Remove the old combiners.
+			for (var pi = 0; pi < path.length; pi++) {
+				var pc = path[pi];
+				columns[pc.x].splice(columns[pc.x].indexOf(pc), 1);
+			}
 		}
-		two.y = height + (two.y - 7);
-		combiners.push(two);
+	};
+
+	var gravity = function() {
+		// Gravity fall
+		for (var column = 0; column < columns.length; column++) {
+			var combiners = columns[column];
+			combiners.sort(function(a, b) {
+				return a.y - b.y;
+			});
+
+			for (var y = 0; y < combiners.length; y++) {
+				combiners[y].y = y;
+			}
+		}
+	};
+
+	self.push = function(combiner) {
+		// Make sure that the combiner
+		// is within the board.
+		var x = combiner.x;
+		x = x < 0 ? 0 : x;
+		x = x < 7 ? x : 6;
+		combiner.x = x;
+
+		// Gravity fall into the column.
+		var height = getColumnHeight(x);
+		combiner.y = height;
+
+		// TODO: Fix y too.
+		columns[combiner.x][combiner.y] = combiner;
 	};
 
 	self.state = function() {
 		var gameOver = false;
 
-		for (var x = 0; x < combiners.length; x++) {
-			if (getRowHeight(x) > 7) {
+		for (var column = 0; column < columns.length; column++) {
+			if (getColumnHeight(column) > 7) {
 				gameOver = true;
 				break;
 			}
 		}
 		if (gameOver) {
 			// TODO: Game over
-			combiners = [];
+			self.reset();
+		}
+	};
+
+	self.reset = function() {
+		// TODO: Store that 7 somewhere.
+		for (var column = 0; column <= 7; column++) {
+			columns[column] = [];
 		}
 	};
 
 	self.draw = function(context) {
-		for (var i = 0; i < combiners.length; i++) {
-			combiners[i].draw(context);
+		for (var column = 0; column < columns.length; column++) {
+			for (var row = 0; row < columns[column].length; row++) {
+				columns[column][row].draw(context);
+			}
 		}
 	};
 
@@ -394,7 +396,12 @@ window.addEventListener("keypress", function(e) {
 
 	switch (e.key) {
 		case "ArrowDown":
-			Board.add(Active.get());
+			var combiner = Active.get();
+			combiner.sort(CombinerSort);
+
+			for (var i = 0; i < combiner.length; i ++) {
+				Board.push(combiner[i]);
+			}
 			Active.new();
 
 			var changed = true;
