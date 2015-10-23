@@ -358,10 +358,18 @@ var Board = (function() {
 		}
 		two.y = height + (two.y - 7);
 		combiners.push(two);
+	};
 
-		if (getRowHeight(one.x) <= 7 && getRowHeight(two.x) <= 7) {
+	self.state = function() {
+		var gameOver = false;
 
-		} else {
+		for (var x = 0; x < combiners.length; x++) {
+			if (getRowHeight(x) > 7) {
+				gameOver = true;
+				break;
+			}
+		}
+		if (gameOver) {
 			// TODO: Game over
 			combiners = [];
 		}
@@ -393,6 +401,9 @@ window.addEventListener("keypress", function(e) {
 			while (changed) {
 				changed = Board.combine();
 			}
+
+			Board.state();
+
 			e.preventDefault();
 			break;
 
