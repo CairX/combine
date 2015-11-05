@@ -13,8 +13,6 @@ var Game = (function() {
 
 	var self = {};
 	self.draw = function() {
-		context.clearRect(0, 0, canvas.width, canvas.height);
-
 		for (var i = 0; i < items.length; i++) {
 			items[i].draw(context);
 		}
@@ -24,7 +22,7 @@ var Game = (function() {
 
 	self.init = function() {
 		canvas = document.getElementById("canvas");
-		canvas.width = settings.size * settings.width + 100;
+		canvas.width = settings.size * (settings.width + 2);
 		canvas.height = settings.size * settings.height;
 		context = canvas.getContext("2d");
 

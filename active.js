@@ -13,25 +13,33 @@ var Active = (function() {
 	var two;
 	var state;
 
+	var width = settings.size * settings.width;
+	var height = settings.size * 2;
+
 	var self = {};
 	self.draw = function(context) {
+		context.clearRect(0, 0, width, height);
+
+		context.fillStyle = "rgba(255, 255, 255, 0.1)";
+   		context.fillRect(0, 0, width, height - 1); // Don't cover the line
+
 		context.lineWidth = 1;
-		context.strokeStyle = "rgba(255, 255, 255, 0.25)";
+		context.strokeStyle = "rgba(0, 0, 0, 0.25)";
 		context.beginPath();
-		context.moveTo(0, settings.size * 2  + 0.5);
-		context.lineTo(settings.size * settings.width, settings.size * 2 + 0.5);
-		context.closePath();
+		context.moveTo(0, height - 0.5);
+		context.lineTo(width, height - 0.5);
 		context.stroke();
 
 		one.draw(context);
 		two.draw(context);
 	};
 
-	self.new = function() {
+	self.init = function() {
 		one = new Combiner(Levels.getRandom(), 3, 7);
 		two = new Combiner(Levels.getRandom(), 4, 7);
 		state = 0;
 	};
+	self.new = self.init;
 
 	self.moveLeft = function() {
 		if (one.x > 0 && two.x > 0) {

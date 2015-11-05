@@ -1,5 +1,5 @@
 /* exported Board */
-/* globals Combiner, CombinerSort, Levels */
+/* globals Combiner, CombinerSort, Levels, settings */
 /* --------------------------------- */
 "use strict";
 
@@ -182,6 +182,16 @@ var Board = (function() {
 	};
 
 	self.draw = function(context) {
+		var width = settings.size * settings.width;
+		var height = settings.size * (settings.height - 2);
+		var x = 0;
+		var y = settings.size * 2;
+
+		context.clearRect(x, y, width, height);
+
+		context.fillStyle = "rgba(255, 255, 255, 0.1)";
+		context.fillRect(x, y, width, height);
+
 		for (var column = 0; column < columns.length; column++) {
 			for (var row = 0; row < columns[column].length; row++) {
 				columns[column][row].draw(context);
