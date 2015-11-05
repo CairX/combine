@@ -21,16 +21,17 @@ var Game = (function() {
 	self.draw = function() {
 		context.clearRect(0, 0, canvas.width, canvas.height);
 
-		for (var i = 0; i < items.length; i++) {
-			items[i].draw(context);
-		}
-
-		context.strokeStyle = "#555";
+		context.lineWidth = 1;
+		context.strokeStyle = "rgba(255, 255, 255, 0.25)";
 		context.beginPath();
 		context.moveTo(0, settings.size * 2  + 0.5);
 		context.lineTo(settings.size * settings.width, settings.size * 2 + 0.5);
 		context.closePath();
 		context.stroke();
+
+		for (var i = 0; i < items.length; i++) {
+			items[i].draw(context);
+		}
 
 		window.requestAnimationFrame(self.draw);
 	};
@@ -56,16 +57,16 @@ var Game = (function() {
 /* --------------------------------- */
 var Levels = (function() {
 	var colors = [
-		"green",
-		"yellow",
-		"orange",
-		"red",
-		"pink",
-		"purple",
-		"blue",
-		"lightblue",
-		"black",
-		"white"
+		"#4caf50", // "green",
+		"#ffeb3b", // "yellow",
+		"#f57c00", // "orange",
+		"#d32f2f", // "red",
+		"#f06292", // "pink",
+		"#9c27b0", // "purple",
+		"#3f51b5", // "blue",
+		"#2196f3", // "lightblue",
+		"#000000", // "black",
+		"#FFFFFF"  // "white"
 	];
 	var min = 0;
 	var max = (colors.length - 1);
@@ -110,9 +111,19 @@ function Combiner(level, x, y) {
 		context.fillStyle = Levels.getColor(this.level);
 		var x = this.x * this.size;
 		var y = (settings.height * this.size) - (this.y * this.size + this.size);
-		context.fillRect(x, y, this.size, this.size);
-		context.strokeStyle = "black";
-		context.strokeRect(x + 0.5, y + 0.5, this.size, this.size);
+
+		var radians = this.size / 2;
+		context.beginPath();
+		context.arc(x + radians, y + radians, radians, 0, (Math.PI * 2), true);
+		context.closePath();
+		context.fill();
+
+		var lineWidth = 4;
+		context.strokeStyle = "rgba(0, 0, 0, 0.33)";
+		context.lineWidth = lineWidth;
+		context.beginPath();
+		context.arc(x + radians, y + radians, radians - (lineWidth / 2), 0, (Math.PI * 2), true);
+		context.stroke();
 	};
 }
 
