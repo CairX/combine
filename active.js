@@ -13,11 +13,26 @@ var Active = (function() {
 	var two;
 	var state;
 
-	var redraw = true;
-	var width = settings.size * settings.width;
-	var height = settings.size * 2;
+	var redraw;
+	var width;
+	var height;
 
 	var self = {};
+	self.init = function() {
+		width = settings.size * settings.width;
+		height = settings.size * 2;
+
+		self.new();
+	};
+
+	self.new = function() {
+		one = new Combiner(Levels.getRandom(), 3, 7);
+		two = new Combiner(Levels.getRandom(), 4, 7);
+		state = 0;
+
+		redraw = true;
+	};
+
 	self.draw = function(context) {
 		if (redraw) {
 			redraw = false;
@@ -37,15 +52,6 @@ var Active = (function() {
 			two.draw(context);
 		}
 	};
-
-	self.init = function() {
-		one = new Combiner(Levels.getRandom(), 3, 7);
-		two = new Combiner(Levels.getRandom(), 4, 7);
-		state = 0;
-
-		redraw = true;
-	};
-	self.new = self.init;
 
 	self.moveLeft = function() {
 		if (one.x > 0 && two.x > 0) {

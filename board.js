@@ -5,9 +5,40 @@
 
 
 var Board = (function() {
-	var columns = [[], [], [], [], [], [], []];
-	var redraw = true;
+	var columns;
+	var redraw;
 	var self = {};
+
+	self.init = function() {
+		columns = [];
+
+		// TODO: Store that 7 somewhere.
+		for (var column = 0; column < 7; column++) {
+			columns[column] = [];
+		}
+
+		redraw = true;
+	};
+
+	self.draw = function(context) {
+		if (redraw) {
+			var width = settings.size * settings.width;
+			var height = settings.size * (settings.height - 2);
+			var x = 0;
+			var y = settings.size * 2;
+
+			context.clearRect(x, y, width, height);
+
+			context.fillStyle = "rgba(255, 255, 255, 0.1)";
+			context.fillRect(x, y, width, height);
+
+			for (var column = 0; column < columns.length; column++) {
+				for (var row = 0; row < columns[column].length; row++) {
+					columns[column][row].draw(context);
+				}
+			}
+		}
+	};
 
 	self.combine = function () {
 		var paths = getPaths();
@@ -175,36 +206,7 @@ var Board = (function() {
 		}
 		if (gameOver) {
 			// TODO: Game over
-			self.reset();
-		}
-	};
-
-	self.reset = function() {
-		// TODO: Store that 7 somewhere.
-		for (var column = 0; column <= 7; column++) {
-			columns[column] = [];
-		}
-
-		redraw = true;
-	};
-
-	self.draw = function(context) {
-		if (redraw) {
-			var width = settings.size * settings.width;
-			var height = settings.size * (settings.height - 2);
-			var x = 0;
-			var y = settings.size * 2;
-
-			context.clearRect(x, y, width, height);
-
-			context.fillStyle = "rgba(255, 255, 255, 0.1)";
-			context.fillRect(x, y, width, height);
-
-			for (var column = 0; column < columns.length; column++) {
-				for (var row = 0; row < columns[column].length; row++) {
-					columns[column][row].draw(context);
-				}
-			}
+			self.init();
 		}
 	};
 

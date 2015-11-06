@@ -20,33 +20,19 @@ var Levels = (function() {
 
 	var min = 0;
 	var max = (colors.length - 1);
-	var unlocked = 1;
+	var unlocked;
 
-	var redraw = true;
-	var size = settings.size / 2;
-	var radians = size / 2;
+	var redraw;
+	var size;
+	var radians;
 
 	var self = {};
-	self.getColor = function(level) {
-		return colors[level];
-	};
 
-	self.getNext = function(level) {
-		var next = (level + 1);
-		if (next <= max) {
-			if (next < max) {
-				// Can't random a max level tile.
-				unlocked = Math.max(unlocked, next);
-				redraw = true;
-			}
-			return next;
-		} else {
-			return null;
-		}
-	};
-
-	self.getRandom = function() {
-		return Math.floor(Math.random() * ((unlocked + 1) - min)) + min;
+	self.init = function() {
+		unlocked = 1;
+		redraw = true;
+		size = settings.size / 2;
+		radians = size / 2;
 	};
 
 	var drawTile = function(context, i) {
@@ -80,6 +66,7 @@ var Levels = (function() {
 		}
 	};
 
+
 	self.draw = function(context) {
 		if (redraw) {
 			redraw = false;
@@ -98,6 +85,28 @@ var Levels = (function() {
 				drawTile(context, i);
 			}
 		}
+	};
+
+	self.getColor = function(level) {
+		return colors[level];
+	};
+
+	self.getNext = function(level) {
+		var next = (level + 1);
+		if (next <= max) {
+			if (next < max) {
+				// Can't random a max level tile.
+				unlocked = Math.max(unlocked, next);
+				redraw = true;
+			}
+			return next;
+		} else {
+			return null;
+		}
+	};
+
+	self.getRandom = function() {
+		return Math.floor(Math.random() * ((unlocked + 1) - min)) + min;
 	};
 
 	return self;

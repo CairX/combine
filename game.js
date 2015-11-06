@@ -26,6 +26,10 @@ var Game = (function() {
 		canvas.height = settings.size * settings.height;
 		context = canvas.getContext("2d");
 
+		for (var i = 0; i < items.length; i++) {
+			items[i].init();
+		}
+
 		self.draw();
 	};
 
@@ -37,9 +41,15 @@ var Game = (function() {
 })();
 
 
+/* --------------------------------- */
+/* Add modules to the game.
+/* --------------------------------- */
 Game.add(Levels);
-Active.new();
 Game.add(Active);
 Game.add(Board);
 
+
+/* --------------------------------- */
+/* Start the game.
+/* --------------------------------- */
 Game.init();
