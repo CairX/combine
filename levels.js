@@ -17,10 +17,12 @@ var Levels = (function() {
 		"#333333", // "black",
 		"#FFFFFF"  // "white"
 	];
+
 	var min = 0;
 	var max = (colors.length - 1);
 	var unlocked = 1;
 
+	var redraw = true;
 	var size = settings.size / 2;
 	var radians = size / 2;
 
@@ -35,6 +37,7 @@ var Levels = (function() {
 			if (next < max) {
 				// Can't random a max level tile.
 				unlocked = Math.max(unlocked, next);
+				redraw = true;
 			}
 			return next;
 		} else {
@@ -78,18 +81,22 @@ var Levels = (function() {
 	};
 
 	self.draw = function(context) {
-		var width = settings.size * 2;
-		var height = settings.size * settings.height;
-		var x = settings.size * settings.width;
-		var y = 0;
+		if (redraw) {
+			redraw = false;
 
-		context.clearRect(x, y, width, height);
-		context.fillStyle = "rgba(0, 0, 0, 0.25)";
-		context.fillRect(x, y, width, height);
+			var width = settings.size * 2;
+			var height = settings.size * settings.height;
+			var x = settings.size * settings.width;
+			var y = 0;
 
-		for (var i = 0; i < colors.length; i++) {
-			context.fillStyle = colors[i];
-			drawTile(context, i);
+			context.clearRect(x, y, width, height);
+			context.fillStyle = "rgba(0, 0, 0, 0.25)";
+			context.fillRect(x, y, width, height);
+
+			for (var i = 0; i < colors.length; i++) {
+				context.fillStyle = colors[i];
+				drawTile(context, i);
+			}
 		}
 	};
 

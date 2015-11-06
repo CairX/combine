@@ -13,31 +13,37 @@ var Active = (function() {
 	var two;
 	var state;
 
+	var redraw = true;
 	var width = settings.size * settings.width;
 	var height = settings.size * 2;
 
 	var self = {};
 	self.draw = function(context) {
-		context.clearRect(0, 0, width, height);
+		if (redraw) {
+			redraw = false;
 
-		context.fillStyle = "rgba(255, 255, 255, 0.1)";
-   		context.fillRect(0, 0, width, height - 1); // Don't cover the line
+			context.clearRect(0, 0, width, height);
+			context.fillStyle = "rgba(255, 255, 255, 0.1)";
+			context.fillRect(0, 0, width, height - 1); // Don't cover the line
 
-		context.lineWidth = 1;
-		context.strokeStyle = "rgba(0, 0, 0, 0.25)";
-		context.beginPath();
-		context.moveTo(0, height - 0.5);
-		context.lineTo(width, height - 0.5);
-		context.stroke();
+			context.lineWidth = 1;
+			context.strokeStyle = "rgba(0, 0, 0, 0.25)";
+			context.beginPath();
+			context.moveTo(0, height - 0.5);
+			context.lineTo(width, height - 0.5);
+			context.stroke();
 
-		one.draw(context);
-		two.draw(context);
+			one.draw(context);
+			two.draw(context);
+		}
 	};
 
 	self.init = function() {
 		one = new Combiner(Levels.getRandom(), 3, 7);
 		two = new Combiner(Levels.getRandom(), 4, 7);
 		state = 0;
+
+		redraw = true;
 	};
 	self.new = self.init;
 
@@ -46,6 +52,7 @@ var Active = (function() {
 			one.x -= 1;
 			two.x -= 1;
 		}
+		redraw = true;
 	};
 
 	self.moveRight = function() {
@@ -53,6 +60,7 @@ var Active = (function() {
 			one.x += 1;
 			two.x += 1;
 		}
+		redraw = true;
 	};
 
 	self.rotate = function() {
@@ -82,6 +90,7 @@ var Active = (function() {
 				state = 0;
 				break;
 		}
+		redraw = true;
 	};
 
 	self.get = function() {

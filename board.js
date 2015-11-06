@@ -6,6 +6,7 @@
 
 var Board = (function() {
 	var columns = [[], [], [], [], [], [], []];
+	var redraw = true;
 	var self = {};
 
 	self.combine = function () {
@@ -16,6 +17,8 @@ var Board = (function() {
 
 		// Gravity fall
 		gravity();
+
+		redraw = true;
 
 		return (paths.length > 0);
 	};
@@ -157,6 +160,8 @@ var Board = (function() {
 
 		// TODO: Fix y too.
 		columns[combiner.x][combiner.y] = combiner;
+
+		redraw = true;
 	};
 
 	self.state = function() {
@@ -179,22 +184,26 @@ var Board = (function() {
 		for (var column = 0; column <= 7; column++) {
 			columns[column] = [];
 		}
+
+		redraw = true;
 	};
 
 	self.draw = function(context) {
-		var width = settings.size * settings.width;
-		var height = settings.size * (settings.height - 2);
-		var x = 0;
-		var y = settings.size * 2;
+		if (redraw) {
+			var width = settings.size * settings.width;
+			var height = settings.size * (settings.height - 2);
+			var x = 0;
+			var y = settings.size * 2;
 
-		context.clearRect(x, y, width, height);
+			context.clearRect(x, y, width, height);
 
-		context.fillStyle = "rgba(255, 255, 255, 0.1)";
-		context.fillRect(x, y, width, height);
+			context.fillStyle = "rgba(255, 255, 255, 0.1)";
+			context.fillRect(x, y, width, height);
 
-		for (var column = 0; column < columns.length; column++) {
-			for (var row = 0; row < columns[column].length; row++) {
-				columns[column][row].draw(context);
+			for (var column = 0; column < columns.length; column++) {
+				for (var row = 0; row < columns[column].length; row++) {
+					columns[column][row].draw(context);
+				}
 			}
 		}
 	};
