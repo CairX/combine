@@ -74,7 +74,7 @@ var Levels = (function() {
 			var width = settings.size * 2;
 			var height = settings.size * settings.height;
 			var x = settings.size * settings.width;
-			var y = 0;
+			var y = settings.size * 2;
 
 			context.clearRect(x, y, width, height);
 			context.fillStyle = "rgba(0, 0, 0, 0.25)";

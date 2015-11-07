@@ -1,4 +1,4 @@
-/* globals Active, Board, Levels, settings */
+/* globals Active, Board, Levels, Score, settings */
 /* --------------------------------- */
 "use strict";
 
@@ -45,6 +45,7 @@ var Game = (function() {
 /* Add modules to the game.
 /* --------------------------------- */
 Game.add(Levels);
+Game.add(Score);
 Game.add(Active);
 Game.add(Board);
 

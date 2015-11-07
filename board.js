@@ -1,5 +1,5 @@
 /* exported Board */
-/* globals Combiner, CombinerSort, Levels, settings */
+/* globals Combiner, CombinerSort, Levels, Score, settings */
 /* --------------------------------- */
 "use strict";
 
@@ -146,6 +146,9 @@ var Board = (function() {
 			path.sort(CombinerSort);
 
 			var base = path.shift();
+
+			Score.add(base.level);
+
 			// Replace old with new.
 			var newLevel = Levels.getNext(base.level);
 			if (newLevel) {
@@ -207,6 +210,8 @@ var Board = (function() {
 		if (gameOver) {
 			// TODO: Game over
 			self.init();
+			Score.init();
+			Levels.init();
 		}
 	};
 
