@@ -29,7 +29,7 @@ var Board = (function() {
 
 			context.clearRect(x, y, width, height);
 
-			context.fillStyle = "rgba(255, 255, 255, 0.1)";
+			context.fillStyle = "rgba(255, 255, 255, 0.5)";
 			context.fillRect(x, y, width, height);
 
 			for (var column = 0; column < columns.length; column++) {

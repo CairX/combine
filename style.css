@@ -4,7 +4,7 @@ html {
 	margin: 0;
 }
 body {
-	background: url("background.jpg") repeat center center;
+	background: #EEE url("background.png") repeat top center;
 
 	height: 100%;
 	padding: 0;

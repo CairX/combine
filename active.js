@@ -38,7 +38,7 @@ var Active = (function() {
 			redraw = false;
 
 			context.clearRect(0, 0, width, height);
-			context.fillStyle = "rgba(255, 255, 255, 0.1)";
+			context.fillStyle = "rgba(255, 255, 255, 0.5)";
 			context.fillRect(0, 0, width, height - 1); // Don't cover the line
 
 			context.lineWidth = 1;
