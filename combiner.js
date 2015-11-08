@@ -31,7 +31,5 @@ function Combiner(level, x, y) {
 }
 
 var CombinerSort = function(a, b) {
-	if (a.x > b.x || a.y > b.y) { return 1; }
-	if (a.x < b.x || a.y < b.y) { return -1; }
-	return 0;
+	return a.y - b.y || a.x - b.x;
 };
