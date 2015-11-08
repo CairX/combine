@@ -181,15 +181,8 @@ var Board = (function() {
 	};
 
 	self.push = function(combiner) {
-		// Make sure that the combiner
-		// is within the board.
-		var x = combiner.x;
-		x = x < 0 ? 0 : x;
-		x = x < 7 ? x : 6;
-		combiner.x = x;
-
 		// Gravity fall into the column.
-		var height = getColumnHeight(x);
+		var height = getColumnHeight(combiner.x);
 		combiner.y = height;
 
 		// TODO: Fix y too.
