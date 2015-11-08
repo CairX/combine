@@ -1,5 +1,5 @@
 /* exported Active */
-/* globals Combiner, Levels, settings */
+/* globals Combiner, Levels, Sprite, settings */
 /* --------------------------------- */
 "use strict";
 
@@ -14,13 +14,13 @@ var Active = (function() {
 	var state;
 
 	var redraw;
-	var width;
-	var height;
+	var base;
 
 	var self = {};
 	self.init = function() {
-		width = settings.size * settings.width;
-		height = settings.size * 2;
+		var width = settings.size * settings.width;
+		var height = settings.size * 2;
+		base = new Sprite(width, height, 0, 0);
 
 		self.new();
 	};
@@ -37,15 +37,18 @@ var Active = (function() {
 		if (redraw) {
 			redraw = false;
 
-			context.clearRect(0, 0, width, height);
+			context.clearRect(base.start.x, base.start.y, base.width, base.height);
+
+			// One less in height to not cover the line as we are working
+			// with transparent colors.
 			context.fillStyle = "rgba(255, 255, 255, 0.5)";
-			context.fillRect(0, 0, width, height - 1); // Don't cover the line
+			context.fillRect(base.start.x, base.start.y, base.width, base.height - 1);
 
 			context.lineWidth = 1;
 			context.strokeStyle = "rgba(0, 0, 0, 0.25)";
 			context.beginPath();
-			context.moveTo(0, height - 0.5);
-			context.lineTo(width, height - 0.5);
+			context.moveTo(base.start.x, base.end.y - 0.5);
+			context.lineTo(base.end.x, base.end.y - 0.5);
 			context.stroke();
 
 			one.draw(context);
