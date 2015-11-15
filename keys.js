@@ -6,11 +6,11 @@
 /* --------------------------------- */
 /* Keyppress
 /* --------------------------------- */
-window.addEventListener("keypress", function(e) {
+window.addEventListener("keyup", function(e) {
 	// console.log(e);
 
-	switch (e.key) {
-		case "ArrowDown":
+	switch (e.keyCode) {
+		case 40: // ArrowDown
 			var combiner = Active.get();
 			combiner.sort(CombinerSort);
 
@@ -29,17 +29,17 @@ window.addEventListener("keypress", function(e) {
 			e.preventDefault();
 			break;
 
-		case "ArrowUp":
+		case 38: // ArrowUp
 			Active.rotate();
 			e.preventDefault();
 			break;
 
-		case "ArrowLeft":
+		case 37: // ArrowLeft
 			Active.moveLeft();
 			e.preventDefault();
 			break;
 
-		case "ArrowRight":
+		case 39: // ArrowRight
 			Active.moveRight();
 			e.preventDefault();
 			break;

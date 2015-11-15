@@ -12,6 +12,6 @@ body {
 }
 canvas {
 	display: block;
-	margin: 1rem auto;
+	margin: 0 auto;
 	border-radius: 2px;
 }
